@@ -1,0 +1,27 @@
+ 
+
+{shop_url}
+
+Hola {firstname} {lastname},
+
+Gracias por crear una cuenta de cliente en {shop_name}.
+
+Tus datos de inicio de sesión en {shop_name}
+
+Estos son tus datos de acceso:
+
+Dirección de correo electrónico: {email}
+
+Consejos Importantes de Seguridad:
+
+1. Mantén los datos de tu cuenta en un lugar seguro.
+
+2. No compartas tus datos de acceso con otras personas.
+
+3. Cambia tu contraseña regularmente.
+
+4. Si sospechas que alguien está utilizando ilegalmente tu cuenta, avísanos inmediatamente.
+
+Hemos recibido tu solicitud de registro y actualmente está en proceso de revisión. Te enviaremos un correo electrónico de confirmación en cuanto un administrador apruebe tu acceso.
+
+[{shop_name}]({shop_url})

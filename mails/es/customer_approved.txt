@@ -1,0 +1,13 @@
+ 
+
+{shop_url}
+
+Hola {firstname} {lastname},
+
+Nos complace informarte que tu registro en {shop_name} ha sido revisado y aprobado con éxito. ¡Ya puedes empezar a hacer tus pedidos en nuestra tienda en línea!
+
+Gracias por confiar en nosotros. Si tienes alguna pregunta o necesitas ayuda, no dudes en ponerte en contacto.
+
+Saludos cordiales,
+
+El equipo de {shop_name}

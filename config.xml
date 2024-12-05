@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module>
+
+    <name>privateshop</name>
+
+    <displayName><![CDATA[Private Shop]]></displayName>
+
+    <description><![CDATA[Controla el acceso a la tienda para permitir únicamente la navegación y compra de clientes previamente aprobados por el administrador.]]></description>
+
+    <version>1.0.0</version>
+
+    <author>Oscar Periche</author>
+
+    <ps_versions_compliancy>
+
+        <min>8.2</min>
+
+        <max>8.2</max>
+
+    </ps_versions_compliancy>
+
+</module>
+

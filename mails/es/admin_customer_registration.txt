@@ -1,0 +1,6 @@
+Hola,
+Un nuevo cliente se ha registrado y está pendiente de revisión. Por favor, revisa la solicitud y aprueba el acceso si cumple con los requisitos.
+
+Nombre: {firstname} {lastname}
+Correo electrónico: {email}
+ID del cliente: {id_customer}

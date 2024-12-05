@@ -1,0 +1,406 @@
+<?php
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
+require_once(_PS_MODULE_DIR_.'privateshop/src/Helper/PrivateShopHelper.php');
+require_once(_PS_MODULE_DIR_.'privateshop/classes/PrivateShopAdmin.php');
+require_once(_PS_MODULE_DIR_.'privateshop/classes/PrivateShopCustomer.php');
+
+class PrivateShop extends Module {
+
+    public $tabs = [
+        [
+            'name' => 'Private Shop',
+            'class_name' => 'AdminClientManagement',
+            'parent_class_name' => 'AdminParentCustomer',
+        ],
+    ];
+
+    public function __construct() {
+        $this->name = 'privateshop';
+        $this->tab = 'administration';
+        $this->version = '1.0.0';
+        $this->author = 'Oscar Periche - 4funkies';
+        $this->need_instance = 0;
+        
+        $this->bootstrap = true;
+
+        parent::__construct();
+
+        $this->displayName = $this->l('Private Shop');
+        $this->description = $this->l('Controla el acceso a la tienda para permitir únicamente la navegación y compra de clientes previamente aprobados por el administrador. Además, ofrece opciones adicionales de restricción, como la posibilidad de habilitar o deshabilitar la opción de envío a domicilio para cada cliente, según las necesidades específicas de la tienda.');
+    }
+    
+    public function install() {
+        if (!parent::install() || !$this->installTab()) {
+            return false;
+        }
+        
+        if (!Db::getInstance()->execute('
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'privateshop_customers` (
+                `customer_id` INT UNSIGNED NOT NULL,
+                `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
+                `approved_at` DATETIME NULL,
+                `shipping_restriction` TINYINT(1) NOT NULL DEFAULT 0,
+                PRIMARY KEY (`customer_id`),
+                CONSTRAINT `fk_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `' . _DB_PREFIX_ . 'customer`(`id_customer`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ')) {
+            $this->_errors[] = $this->l('Error creating privateshop_customers table.');
+            return false;
+        }
+
+        $adminEmail1 = Configuration::get('PS_SHOP_EMAIL');
+        Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_1', $adminEmail1);
+
+        Configuration::updateValue('PS_CUSTOMER_CREATION_EMAIL', 0);
+
+        PrivateShopHelper::copyEmailTemplates();
+
+        Configuration::updateValue('PRIVATE_SHOP_CARRIER_ID', 0);
+
+        if (!$this->registerHook('actionCustomerAccountAdd')) {
+            return false;
+        }
+
+        if (!$this->registerHook('actionObjectCustomerDeleteAfter')) {
+            return false;
+        }
+
+        if (!$this->registerHook('actionFrontControllerSetMedia')) {
+            return false;
+        }
+        
+        if (!$this->registerHook('displayCustomerLoginFormAfter')) {
+            return false;
+        }
+
+        if (!$this->registerHook('displayBeforeCarrier')) {
+            return false;
+        }
+
+        return true;
+    }
+    
+    public function uninstall() {
+        if (!parent::uninstall() || !$this->uninstallTab()) {
+            return false;
+        }
+
+        Configuration::updateValue('PS_CUSTOMER_CREATION_EMAIL', 1);
+        
+        $themeModulesDir = _PS_THEME_DIR_ . 'modules/privateshop';
+
+        if (file_exists($themeModulesDir) && is_writable($themeModulesDir)) {
+            //PrivateShopHelper::deleteFolder($themeModulesDir);
+        }
+
+        return true;
+    } 
+
+    public function enable($force_all = false) {
+        return parent::enable($force_all)
+            && $this->installTab()
+        ;
+    }
+
+    public function disable($force_all = false) {
+        return parent::disable($force_all)
+            && $this->uninstallTab()
+        ;
+    }
+
+    public function installTab() {
+        $tabId = (int) Tab::getIdFromClassName('AdminClientManagementController');
+    
+        if (!$tabId) {
+            $tab = new Tab();
+        } else {
+            $tab = new Tab($tabId);
+        }
+
+        $tab->active = 1;
+        $tab->class_name = 'AdminClientManagementController'; 
+        $tab->name = array();
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = $this->trans('Private Shop', array(), 'Modules.PrivateShop.Admin', $lang['locale']);
+        }
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentCustomers'); 
+        $tab->module = $this->name;
+
+        return $tab->save();
+
+    }  
+
+    public function uninstallTab() {
+        $tabId = (int) Tab::getIdFromClassName('AdminClientManagementController');
+
+        if ($tabId) {
+            $tab = new Tab($tabId);
+            $tab->delete();
+        }
+
+        return true;
+
+    }
+
+    public function getContent() {
+        $output = '';
+
+        if (Tools::isSubmit('submit' . $this->name)) {
+            $adminEmail1 = (string)Tools::getValue('PRIVATE_SHOP_ADMIN_EMAIL_1');
+            $adminEmail2 = (string)Tools::getValue('PRIVATE_SHOP_ADMIN_EMAIL_2');
+            $adminEmail3 = (string)Tools::getValue('PRIVATE_SHOP_ADMIN_EMAIL_3');
+    
+            if (empty($adminEmail1) && empty($adminEmail2) && empty($adminEmail3)) {
+                $adminEmail1 = Configuration::get('PS_SHOP_EMAIL');
+                Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_1', $adminEmail1);
+                Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_2', '');
+                Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_3', '');
+            } else {
+                Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_1', $adminEmail1);
+                Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_2', $adminEmail2);
+                Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_3', $adminEmail3);
+                $output = $this->displayConfirmation($this->l('Los correos electrónicos de notificación se han actualizado correctamente.'));
+            }
+        }        
+
+        if (Tools::isSubmit('PRIVATE_SHOP_CARRIER_ID') && Tools::getValue('PRIVATE_SHOP_CARRIER_ID') !== null) {
+            $carrierId = (int)Tools::getValue('PRIVATE_SHOP_CARRIER_ID');
+            Configuration::updateValue('PRIVATE_SHOP_CARRIER_ID', $carrierId);
+            $output = $this->displayConfirmation($this->l('El transportista se ha actualizado correctamente.'));
+        }
+    
+        $output .= $this->displayForm();
+        $output .= $this->displayCarrierRestrictionForm();
+        return $output;
+    }
+    
+    public function displayForm() {
+        $adminEmail1 = Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_1');
+        $adminEmail2 = Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_2');
+        $adminEmail3 = Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_3');
+        
+        $form = [
+            'form' => [
+                'legend' => [
+                    'title' => $this->l('Notificaciones de nuevos usuarios pendientes de validar'),
+                    'icon' => 'icon-cogs',
+                ],
+                'input' => [
+                    [
+                        'type' => 'text',
+                        'label' => $this->l('Correo 1'),
+                        'name' => 'PRIVATE_SHOP_ADMIN_EMAIL_1',
+                        'desc' => $this->l('Correo 1'),
+                        'required' => true,
+                    ],
+                    [
+                        'type' => 'text',
+                        'label' => $this->l('Correo 2'),
+                        'name' => 'PRIVATE_SHOP_ADMIN_EMAIL_2',
+                        'desc' => $this->l('Correo 2'),
+                    ],
+                    [
+                        'type' => 'text',
+                        'label' => $this->l('Correo 3'),
+                        'name' => 'PRIVATE_SHOP_ADMIN_EMAIL_3',
+                        'desc' => $this->l('Correo 3'),
+                    ]
+                ],
+                'submit' => [
+                    'title' => $this->l('Guardar'),
+                    'class' => 'btn btn-default pull-right',
+                ],
+            ],
+        ];
+    
+        $helper = new HelperForm();
+        $helper->table = $this->table;
+        $helper->name_controller = $this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&' . http_build_query(['configure' => $this->name]);
+        $helper->submit_action = 'submit' . $this->name;
+    
+        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
+
+        $helper->fields_value['PRIVATE_SHOP_ADMIN_EMAIL_1'] = Tools::getValue('PRIVATE_SHOP_ADMIN_EMAIL_1', Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_1'));
+        $helper->fields_value['PRIVATE_SHOP_ADMIN_EMAIL_2'] = Tools::getValue('PRIVATE_SHOP_ADMIN_EMAIL_2', Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_2'));
+        $helper->fields_value['PRIVATE_SHOP_ADMIN_EMAIL_3'] = Tools::getValue('PRIVATE_SHOP_ADMIN_EMAIL_3', Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_3'));
+
+        return $helper->generateForm([$form]);
+    }     
+    
+    public function displayCarrierRestrictionForm() {
+        $carrierId = Configuration::get('PRIVATE_SHOP_CARRIER_ID');
+        
+        $carriers = Carrier::getCarriers(
+            (int)Configuration::get('PS_LANG_DEFAULT'),
+            true,
+            false,
+            false,
+            null,
+            Carrier::ALL_CARRIERS
+        );
+
+        $carrierOptions = [];
+        $carrierOptions[] = [
+            'id_option' => 0,
+            'name' => "Seleccionar Transportista..."
+        ];
+        foreach ($carriers as $carrier) {
+            $carrierOptions[] = [
+                'id_option' => $carrier['id_carrier'],
+                'name' => $carrier['name']
+            ];
+        }
+
+        $form = [
+            'form' => [
+                'legend' => [
+                    'title' => $this->l('Seleccionar Transportista para Envío a Domicilio'),
+                    'icon' => 'icon-cogs',
+                ],
+                'input' => [
+                    [
+                        'type' => 'select',
+                        'label' => $this->l('Este transportista no se mostrará si el cliente no tiene habilitada la opción de envío a domicilio.'),
+                        'name' => 'PRIVATE_SHOP_CARRIER_ID',
+                        'options' => [
+                            'query' => $carrierOptions,
+                            'id' => 'id_option',
+                            'name' => 'name'
+                        ],
+                        'required' => true,
+                    ],
+                ],
+                'submit' => [
+                    'title' => $this->l('Guardar'),
+                    'class' => 'btn btn-default pull-right',
+                ],
+            ],
+        ];
+
+        $helper = new HelperForm();
+        $helper->table = $this->table;
+        $helper->name_controller = $this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&' . http_build_query(['configure' => $this->name]);
+        $helper->submit_action = 'submit' . $this->name;
+
+        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
+
+        $helper->fields_value['PRIVATE_SHOP_CARRIER_ID'] = Tools::getValue('PRIVATE_SHOP_CARRIER_ID', $carrierId);
+
+        return $helper->generateForm([$form]);
+    }
+    
+    /*
+    // Hooks
+    */
+
+    public function hookActionCustomerAccountAdd($params) {
+        $customer = $params['newCustomer'];
+        
+        Db::getInstance()->insert('privateshop_customers', [
+            'customer_id' => (int)$customer->id,
+            'is_approved' => 0,
+            'approved_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $adminEmails = array_filter([
+            Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_1'),
+            Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_2'),
+            Configuration::get('PRIVATE_SHOP_ADMIN_EMAIL_3'),
+        ]);
+    
+        if (!empty($adminEmails)) {
+            PrivateShopAdmin::sendAdminNotification($customer, $adminEmails, $this->context);
+        }
+
+        PrivateShopCustomer::sendCustomerNotification($customer, $this->context);
+    }
+
+    public function hookActionObjectCustomerDeleteAfter($params) {
+        $customer = $params['object'];
+
+        if (isset($customer->id)) {
+            Db::getInstance()->delete('privateshop_customers', 'customer_id = ' . (int)$customer->id);
+        }
+    }
+    
+    public function hookActionFrontControllerSetMedia($hookParams) {
+        $controller = Tools::getValue('controller');
+    
+        if (in_array($controller, ['authentication', 'registration', 'password']) ||
+            ($controller === 'password' && $action === 'sendResetLink')) {
+            return;
+        }
+    
+        if ($this->context->customer->isLogged()) {
+            $customer = new PrivateShopCustomer($this->context->customer->id);
+            if (!$customer->getIsApproved()) {
+                $this->context->customer->logout();
+                Tools::redirect('index.php?controller=authentication&approval_needed=1');
+            }
+        } else {
+            Tools::redirect('index.php?controller=authentication');
+        }
+    }
+        
+    public function hookDisplayCustomerLoginFormAfter($params) {
+        if (Tools::getValue('approval_needed') == 1) {
+            return '
+                <div class="alert alert-warning not_approved">
+                    Hemos recibido tu solicitud de registro y pronto será revisada. Para acceder a tu cuenta, necesitas la validación de un administrador. Una vez aprobada, recibirás un correo electrónico de confirmación.
+                </div>
+                <style>
+                    .page-authentication #content {
+                        background-color: transparent !important;
+                        margin-left: 0 !important;
+                        padding:0 !important;
+                    }
+
+                    .not_approved {
+                        font-size: 1rem;
+                        line-height: 1.5em;
+                    }
+                </style>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var loginForm = document.querySelector(".login-form");
+                        var noAccount = document.querySelector(".no-account");
+                        var hrElement = document.querySelector("#content hr");
+
+                        if (loginForm) loginForm.style.display = "none";
+                        if (noAccount) noAccount.style.display = "none";
+                        if (hrElement) hrElement.style.display = "none";
+                    });
+                </script>
+            ';
+        }
+        return '';
+    }
+
+    public function hookDisplayBeforeCarrier($params) {    
+        $shippingActivate = Db::getInstance()->getValue('
+            SELECT shipping_restriction 
+            FROM ' . _DB_PREFIX_ . 'privateshop_customers 
+            WHERE customer_id = ' . (int)$this->context->customer->id
+        );
+
+        $id_carrier_to_hide = Configuration::get('PRIVATE_SHOP_CARRIER_ID');
+
+        if (!$shippingActivate) {
+            echo '
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var deliveryBlock = document.querySelector("#delivery-block-' . $id_carrier_to_hide . '");
+                        if (deliveryBlock) deliveryBlock.style.display = "none";
+                    });
+                </script>
+            ';
+        }
+    }
+}
