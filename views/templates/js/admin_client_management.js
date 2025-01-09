@@ -80,6 +80,42 @@ $(document).ready(function() {
         $('#alertModal').modal('show');
     }
 
+    // Employee Code
+    
+    $('.update-employee-code').on('click', function(e) {
+        e.preventDefault();
+
+        var customerId = $(this).data('customer-id');
+        var employeeCode = $('.employee-code-input[data-customer-id="' + customerId + '"]').val();
+        var url = $("#url-employee-code").attr("data-value");
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                ajax: true,
+                id_customer: customerId,
+                employee_code: employeeCode,
+            },
+            success: function(response) {
+                try {
+                    const parsedResponse = JSON.parse(response);
+                    if (parsedResponse.success) {
+                        showSuccessMessage('¡Código de empleado actualizado correctamente!');
+                    } else {
+                        showAlert('Error al actualizar el código de empleado.');
+                    }
+                } catch (e) {
+                    showAlert('Respuesta del servidor no válida: ' + e.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                showAlert('Se ha producido un error en el servidor: ' + error);
+            }
+        });
+    });
+
+
     // Shipping
 
     $('.shipping-restriction-toggle').on('change', function () {

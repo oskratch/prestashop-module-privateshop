@@ -1,6 +1,6 @@
 <div class="panel col-md-12">
     <div class="panel-heading">
-        Pendientes de aprobación			
+        {l s='Pendientes de aprobación'}	
     </div>    
     <div class="table-responsive-row clearfix">
         {if $customers|@count > 0}
@@ -71,10 +71,10 @@
 </div>
 <div class="panel col-md-12">
     <div class="panel-heading">
-        Opción de envío a domicilio			
+        Códigos de empleados y opción de envío a domicilio			
     </div>
     <p class="pb-3">
-        <small class="form-text">De forma predeterminada, la opción de envío a domicilio está deshabilitada para los clientes registrados.</small>
+        <small class="form-text">{l s='De forma predeterminada, la opción de envío a domicilio está deshabilitada para los clientes registrados.'}</small>
     </p>
     {if $all_customers|@count > 0}
         <table class="table">
@@ -83,6 +83,7 @@
                     <th>{l s='Nombre'}</th>
                     <th>{l s='Apellidos'}</th>
                     <th>{l s='Email'}</th>
+                    <th>{l s='Código de empleado'}
                     <th>{l s='Envío a domicilio'}</th>
                 </tr>
             </thead>
@@ -92,6 +93,15 @@
                         <td>{$customer.firstname}</td>
                         <td>{$customer.lastname}</td>
                         <td>{$customer.email}</td>
+                        <td style="white-space: nowrap;">
+                            <input type="text" class="form-control employee-code-input" 
+                                value="{$customer.employee_code}" 
+                                data-customer-id="{$customer.customer_id}" style="max-width:150px; display:inline-block;">
+                            <button class="btn btn-primary update-employee-code" 
+                                 data-customer-id="{$customer.customer_id}" style="display:inline-block;">
+                                Actualizar
+                            </button>
+                        </td>
                         <td>
                             <span class="switch prestashop-switch fixed-width-lg">
                                 <input type="radio" 
@@ -124,5 +134,6 @@
     {/if}
 </div>
 <div id="url-shipping" data-value="{$link->getAdminLink('AdminClientManagement')}&shipping=1"></div>
+<div id="url-employee-code" data-value="{$link->getAdminLink('AdminClientManagement')}&employecode=1"></div>
 <div id="token-container" data-token="{$_token}"></div>
 <script type="text/javascript" src="{$module_dir}views/templates/js/admin_client_management.js"></script>

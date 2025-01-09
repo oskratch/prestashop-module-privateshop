@@ -3,7 +3,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once(_PS_MODULE_DIR_.'privateshop/src/Helper/PrivateShopHelper.php');
 require_once(_PS_MODULE_DIR_.'privateshop/classes/PrivateShopAdmin.php');
 require_once(_PS_MODULE_DIR_.'privateshop/classes/PrivateShopCustomer.php');
 
@@ -43,6 +42,7 @@ class PrivateShop extends Module {
                 `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
                 `approved_at` DATETIME NULL,
                 `shipping_restriction` TINYINT(1) NOT NULL DEFAULT 0,
+                `employee_code` CHAR(60) NULL,
                 PRIMARY KEY (`customer_id`),
                 CONSTRAINT `fk_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `' . _DB_PREFIX_ . 'customer`(`id_customer`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -55,8 +55,6 @@ class PrivateShop extends Module {
         Configuration::updateValue('PRIVATE_SHOP_ADMIN_EMAIL_1', $adminEmail1);
 
         Configuration::updateValue('PS_CUSTOMER_CREATION_EMAIL', 0);
-
-        PrivateShopHelper::copyEmailTemplates();
 
         Configuration::updateValue('PRIVATE_SHOP_CARRIER_ID', 0);
 
@@ -91,10 +89,6 @@ class PrivateShop extends Module {
         Configuration::updateValue('PS_CUSTOMER_CREATION_EMAIL', 1);
         
         $themeModulesDir = _PS_THEME_DIR_ . 'modules/privateshop';
-
-        if (file_exists($themeModulesDir) && is_writable($themeModulesDir)) {
-            //PrivateShopHelper::deleteFolder($themeModulesDir);
-        }
 
         return true;
     } 
@@ -372,11 +366,25 @@ class PrivateShop extends Module {
                         var loginForm = document.querySelector(".login-form");
                         var noAccount = document.querySelector(".no-account");
                         var hrElement = document.querySelector("#content hr");
+                        var topMenu = document.querySelector(".top-menu");
+                        var searchBar = document.querySelector("#search_widget");
 
                         if (loginForm) loginForm.style.display = "none";
                         if (noAccount) noAccount.style.display = "none";
                         if (hrElement) hrElement.style.display = "none";
+                        if (topMenu) topMenu.style.display = "none";
+                        if (searchBar) searchBar.style.display = "none";
                     });
+                </script>
+            ';
+        }
+        if (!$this->context->customer->isLogged()) {
+            return '
+                <script>
+                    var topMenu = document.querySelector(".top-menu");
+                    var searchBar = document.querySelector("#search_widget");
+                    if (topMenu) topMenu.style.display = "none";
+                    if (searchBar) searchBar.style.display = "none";
                 </script>
             ';
         }

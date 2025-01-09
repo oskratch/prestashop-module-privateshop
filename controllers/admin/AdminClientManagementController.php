@@ -51,6 +51,32 @@ class AdminClientManagementController extends ModuleAdminController {
             } else {
                 die(json_encode(['success' => false]));
             }
+        }      
+     
+        if (Tools::isSubmit('employecode') && Tools::getValue('id_customer') && Tools::getValue('employee_code') !== null) {
+            $idCustomer = (int)Tools::getValue('id_customer');
+            $employeeCode = Tools::getValue('employee_code');
+        
+            if (!$idCustomer || !Validate::isUnsignedId($idCustomer)) {
+                $response = array('success' => false, 'message' => 'ID de cliente no válido.');
+                echo json_encode($response);
+                exit;
+            }
+        
+            $result = Db::getInstance()->update(
+                'privateshop_customers',
+                array('employee_code' => $employeeCode),
+                'customer_id = ' . (int)$idCustomer
+            );
+        
+            if ($result) {
+                $response = array('success' => true);
+            } else {
+                $response = array('success' => false, 'message' => 'Error al actualizar la base de datos.');
+            }
+        
+            echo json_encode($response);
+            exit;
         }
      
         if (Tools::isSubmit('shipping') && Tools::getValue('id_customer') && Tools::getValue('shipping_restriction') !== null) {
@@ -94,7 +120,7 @@ class AdminClientManagementController extends ModuleAdminController {
 
         $customers = Db::getInstance()->executeS($sql);
 
-        $sql_all_customers = 'SELECT p.customer_id, c.firstname, c.lastname, c.email, p.is_approved, p.approved_at, p.shipping_restriction
+        $sql_all_customers = 'SELECT p.customer_id, c.firstname, c.lastname, c.email, p.is_approved, p.approved_at, p.shipping_restriction, p.employee_code
                 FROM ' . _DB_PREFIX_ . 'privateshop_customers p
                 JOIN ' . _DB_PREFIX_ . 'customer c ON p.customer_id = c.id_customer
                 WHERE p.is_approved = 1';
