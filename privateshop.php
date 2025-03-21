@@ -327,8 +327,7 @@ class PrivateShop extends Module {
     public function hookActionFrontControllerSetMedia($hookParams) {
         $controller = Tools::getValue('controller');
     
-        if (in_array($controller, ['authentication', 'registration', 'password']) ||
-            ($controller === 'password' && $action === 'sendResetLink')) {
+        if (in_array($controller, ['authentication', 'registration', 'password', 'cms', 'order-confirmation', 'validation', 'redsys', 'securepayment', 'processpayment', 'processpaymentref', 'securepaymentv2'])) {
             return;
         }
     
