@@ -113,7 +113,7 @@ class AdminClientManagementController extends ModuleAdminController {
     }    
 
     private function getClientManagement() {
-        $sql = 'SELECT p.customer_id, c.firstname, c.lastname, c.email, p.is_approved, p.approved_at
+        $sql = 'SELECT p.customer_id, c.firstname, c.lastname, c.email, p.dni, p.is_approved, p.approved_at
                 FROM ' . _DB_PREFIX_ . 'privateshop_customers p
                 JOIN ' . _DB_PREFIX_ . 'customer c ON p.customer_id = c.id_customer
                 WHERE p.is_approved = 0';

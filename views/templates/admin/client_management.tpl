@@ -9,6 +9,7 @@
                     <tr>
                         <th>{l s='Nombre'}</th>
                         <th>{l s='Apellidos'}</th>
+                        <th>{l s='DNI'}</th>
                         <th>{l s='Email'}</th>
                         <th>{l s='Fecha'}</th>
                         <th>{l s='Acciones'}</th>
@@ -19,6 +20,7 @@
                         <tr data-customer-id="{$customer.customer_id}">
                             <td>{$customer.firstname}</td>
                             <td>{$customer.lastname}</td>
+                            <td>{$customer.dni}</td>
                             <td>{$customer.email}</td>
                             <td>{$customer.approved_at|date_format:'%d-%m-%Y %H:%M'}</td>
                             <td>

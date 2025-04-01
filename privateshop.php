@@ -39,6 +39,7 @@ class PrivateShop extends Module {
         if (!Db::getInstance()->execute('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'privateshop_customers` (
                 `customer_id` INT UNSIGNED NOT NULL,
+                `dni` CHAR(20) NULL,
                 `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
                 `approved_at` DATETIME NULL,
                 `shipping_restriction` TINYINT(1) NOT NULL DEFAULT 0,
@@ -75,6 +76,10 @@ class PrivateShop extends Module {
         }
 
         if (!$this->registerHook('displayBeforeCarrier')) {
+            return false;
+        }
+
+        if (!$this->registerHook('displayCustomerAccountForm')) {
             return false;
         }
 
@@ -296,9 +301,11 @@ class PrivateShop extends Module {
 
     public function hookActionCustomerAccountAdd($params) {
         $customer = $params['newCustomer'];
+        $dni = Tools::getValue('dni');
         
         Db::getInstance()->insert('privateshop_customers', [
             'customer_id' => (int)$customer->id,
+            'dni' => pSQL($dni),
             'is_approved' => 0,
             'approved_at' => date('Y-m-d H:i:s'),
         ]);
@@ -390,24 +397,28 @@ class PrivateShop extends Module {
         return '';
     }
 
-    public function hookDisplayBeforeCarrier($params) {    
-        $shippingActivate = Db::getInstance()->getValue('
-            SELECT shipping_restriction 
-            FROM ' . _DB_PREFIX_ . 'privateshop_customers 
-            WHERE customer_id = ' . (int)$this->context->customer->id
-        );
-
-        $id_carrier_to_hide = Configuration::get('PRIVATE_SHOP_CARRIER_ID');
-
-        if (!$shippingActivate) {
-            echo '
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        var deliveryBlock = document.querySelector("#delivery-block-' . $id_carrier_to_hide . '");
-                        if (deliveryBlock) deliveryBlock.style.display = "none";
-                    });
-                </script>
-            ';
-        }
+    public function hookDisplayCustomerAccountForm($params) {
+        return '
+            <div class="form-group row">
+                <label class="form-control-label col-md-3 required" for="dni">' . $this->l('DNI') . '</label>
+                <div class="col-md-6 js-input-column">
+                    <input type="text" class="form-control" name="dni" id="dni" value="' . Tools::getValue('dni') . '" required>
+                    <span class="form-control-comment">
+                        Por favor, asegúrate de que el DNI sea correcto, ya que será utilizado para validar tu registro .
+                    </span>
+                </div>
+                <div class="col-md-3 form-control-comment"></div>
+            </div>
+            <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var dniField = document.querySelector(".form-group input[name=\'dni\']").closest(".form-group");
+                var genderField = document.querySelector(".form-group input[name=\'id_gender\']").closest(".form-group");
+                
+                if (dniField && genderField) {
+                genderField.parentNode.insertBefore(dniField, genderField.nextSibling);
+                }
+            });
+            </script>
+        ';
     }
 }
