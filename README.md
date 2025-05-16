@@ -35,7 +35,5 @@ This module is ideal for stores that require manual approval of customers before
 If you need help or have questions about this module, you can contact `oskratch@gmail.com`.
 
 ## License
-This module is available under the **MIT** license, allowing use, modification, and redistribution as long as the original copyright notice is retained.
-
-For more details, see the [LICENSE](LICENSE) file.
+This module is licensed under the GPLv2 or later. See [LICENSE](LICENSE) for details.
 
