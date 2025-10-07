@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/oskratch/prestashop-module-privateshop/compare/v1.0.0...v1.1.0) (2025-10-07)
+
+
+### Features
+
+* add honeypot anti-spam system and update README ([273a9aa](https://github.com/oskratch/prestashop-module-privateshop/commit/273a9aa30be11316d113657167488e5f3fad5870))
+
 ## 1.0.0 (2025-05-30)
 
 
