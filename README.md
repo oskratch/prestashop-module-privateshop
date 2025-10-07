@@ -1,59 +1,60 @@
 # Private Shop - Store Access Control
  
-**Compatible with PrestaShop:** 1.6.x, 1.7.x, and 1.8.x  
-**Author:** Oscar Periche  
-**License:** GPLv2 or later  
+[![PrestaShop](https://img.shields.io/badge/PrestaShop-1.7.x%20%7C%201.8.x-blue)](https://www.prestashop.com/)
+[![PHP](https://img.shields.io/badge/PHP-7.2%2B-blue)](https://www.php.net/)
+[![License](https://img.shields.io/badge/License-GPL--2.0-green.svg)](LICENSE)
 
 ## Description
-The Private Shop module enhances your PrestaShop store's security by restricting access to only pre-approved customers. This is ideal for B2B stores, exclusive shops, or any scenario where manual customer validation is required. In addition to access control, it includes anti-spam measures and flexible shipping options.
+Transform your PrestaShop store into a private, invitation-only shop with complete access control. This module is perfect for B2B stores, exclusive retailers, or any business requiring customer pre-approval before allowing purchases.
 
-## Requirements
-- PrestaShop 1.6.x, 1.7.x, or 1.8.x
-- PHP 5.6 or higher
-- MySQL 5.0 or higher
+## How It Works
 
-## Main Features
-- **Customer Registration:** Allows customers to register with additional fields like DNI.
-- **Admin Notifications:** Admins receive emails for new registrations.
-- **Approval Workflow:** Admins can approve or reject customers via the backoffice.
-- **Customer Notifications:** Approved customers get confirmation emails.
-- **Access Restrictions:** Unapproved users are limited to login, registration, and password recovery pages.
-- **Anti-Spam Honeypot:** Hidden form fields detect and block bots during registration.
-- **Shipping Management:** Home delivery can be disabled by default and enabled per customer.
+### Customer Registration Flow
+1. **Customer registers** through the standard registration form with additional DNI field
+2. **Account created but restricted** - customer cannot browse or purchase yet
+3. **Admin receives notification** email about the new registration
+4. **Admin reviews and approves** the customer in the backoffice
+5. **Customer receives approval email** and can now access the full store
 
-### How the Honeypot Works
-The honeypot uses invisible form fields that humans ignore but bots fill automatically. If a field is completed or the form is submitted too quickly (< 2 seconds), the registration is blocked with a generic error message to avoid alerting spammers.
+### Access Control
+- **Unapproved customers:** Redirected to login page with approval pending message
+- **Non-logged users:** Can only access login, registration, and password recovery pages
+- **Approved customers:** Full store access with optional shipping restrictions
+
+### Admin Management
+Navigate to **Customers > Private Shop** in your backoffice to:
+- View all pending customer approvals
+- Approve or reject customer accounts
+- Manage individual shipping permissions (enable/disable home delivery per customer)
+- Configure notification emails and carrier restrictions
+
+## Key Features
+- **Secure Registration:** Enhanced registration form with DNI validation and anti-spam protection
+- **Email Notifications:** Automated emails to admins and customers during the approval process
+- **Flexible Shipping Control:** Disable home delivery by default, enable per customer as needed
+- **Anti-Spam Protection:** Built-in honeypot system blocks automated bot registrations
+- **Seamless Integration:** Works with existing PrestaShop themes and doesn't affect approved customer experience
 
 ## Installation
-1. Download or clone the module repository.
-2. Compress the `privateshop/` folder into a `.zip` file.
-3. Log in to your PrestaShop admin panel.
-4. Navigate to **Modules > Module Manager > Upload a Module**.
-5. Upload the `.zip` file and click **Install**.
-6. Activate the module if not done automatically.
+1. Download the latest release from GitHub
+2. In your PrestaShop admin, go to **Modules > Module Manager**
+3. Click **Upload a Module** and select the downloaded ZIP file
+4. Install and configure the module through the **Configure** button
 
 ## Configuration
-1. Go to **Modules > Module Manager** and find "Private Shop".
-2. Click **Configure** to set admin notification emails and carrier restrictions.
-3. In the backoffice, under **Customers > Private Shop**, manage customer approvals and shipping permissions.
+1. **Module Settings:** Configure admin notification emails and select carriers for shipping restrictions
+2. **Customer Management:** Use **Customers > Private Shop** to manage approvals and permissions
+3. **Email Templates:** Customize notification emails in **Design > Email Themes** if needed
 
-## Uninstallation
-1. Go to **Modules > Module Manager**.
-2. Find "Private Shop" and click **Uninstall**.
-3. Confirm; note that customer data in `privateshop_customers` is preserved.
-
-## Troubleshooting
-- **Honeypot not working:** Ensure the module is reset after updates.
-- **Emails not sending:** Check PrestaShop email settings.
-- **Access issues:** Verify user approval status in the admin panel.
-- **500 Errors:** Clear PrestaShop cache and check server logs.
-
-## Changelog
-- **v1.0.0:** Initial release with access control, approvals, and honeypot anti-spam.
+## Perfect For
+- **B2B Stores:** Require business verification before allowing access
+- **Exclusive Retailers:** Create VIP or member-only shopping experiences  
+- **Wholesale Businesses:** Control who can see products and pricing
+- **Regional Stores:** Restrict access based on location or delivery areas
 
 ## Support
-For issues or questions, contact `oskratch@gmail.com` or open an issue on GitHub.
+For technical support or questions, contact `oskratch@gmail.com` or create an issue on the GitHub repository.
 
 ## License
-This module is licensed under the GPLv2 or later. See [LICENSE](LICENSE) for details.
+Licensed under GPL-2.0. See [LICENSE](LICENSE) file for details.
 
