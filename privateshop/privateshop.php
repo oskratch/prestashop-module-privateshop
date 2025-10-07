@@ -79,7 +79,7 @@ class PrivateShop extends Module {
             return false;
         }
 
-        if (!$this->registerHook('displayCustomerAccountForm')) {
+        if (!$this->registerHook('createAccountForm')) {
             return false;
         }
 
@@ -300,6 +300,20 @@ class PrivateShop extends Module {
     */
 
     public function hookActionCustomerAccountAdd($params) {
+        // Honeypot validation
+        $timestamp = Tools::getValue('ts');
+        $textField = Tools::getValue('website');
+        $checkbox = Tools::getValue('agree');
+
+        // Validate: if the text field or checkbox is filled, or if it's too fast (< 2 seconds)
+        if (!empty($textField) || !empty($checkbox) || (time() - $timestamp) < 2) {
+            // Delete the customer since it's already created
+            $customer = $params['newCustomer'];
+            Db::getInstance()->delete('customer', 'id_customer = ' . (int)$customer->id);
+            $this->context->controller->errors[] = $this->l('Se ha producido un error inesperado. Por favor, inténtalo de nuevo más tarde.');
+            return false; // Bloquejar
+        }
+
         $customer = $params['newCustomer'];
         $dni = Tools::getValue('dni');
         
@@ -397,7 +411,13 @@ class PrivateShop extends Module {
         return '';
     }
 
-    public function hookDisplayCustomerAccountForm($params) {
+    public function hookCreateAccountForm($params) {
+        $timestamp = time();
+        $honeypotHtml = '
+            <input type="text" name="website" style="display:none !important;" tabindex="-1" autocomplete="off">
+            <input type="checkbox" name="agree" style="display:none !important;" tabindex="-1">
+            <input type="hidden" name="ts" value="' . $timestamp . '">
+        ';
         return '
             <div class="form-group row">
                 <label class="form-control-label col-md-3 required" for="dni">' . $this->l('DNI') . '</label>
@@ -409,6 +429,7 @@ class PrivateShop extends Module {
                 </div>
                 <div class="col-md-3 form-control-comment"></div>
             </div>
+            ' . $honeypotHtml . '
             <script>
             document.addEventListener("DOMContentLoaded", function() {
                 var dniField = document.querySelector(".form-group input[name=\'dni\']").closest(".form-group");
