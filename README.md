@@ -1,7 +1,7 @@
 # Private Shop - Store Access Control
  
 **Compatible with PrestaShop:** 1.6.x, 1.7.x, and 1.8.x  
-**Author:** Oscar Periche (4funkies)  
+**Author:** Oscar Periche  
 **License:** GPLv2 or later  
 
 ## Description

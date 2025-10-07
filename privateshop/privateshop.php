@@ -20,7 +20,7 @@ class PrivateShop extends Module {
         $this->name = 'privateshop';
         $this->tab = 'administration';
         $this->version = '1.0.0';
-        $this->author = 'Oscar Periche - 4funkies';
+        $this->author = 'Oscar Periche';
         $this->need_instance = 0;
         
         $this->bootstrap = true;
