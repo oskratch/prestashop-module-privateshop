@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/oskratch/prestashop-module-privateshop/compare/v1.1.0...v1.1.1) (2025-10-07)
+
+
+### Bug Fixes
+
+* update author information ([c34f431](https://github.com/oskratch/prestashop-module-privateshop/commit/c34f431726e16f03f507a8f55501e27d9586b0fd))
+
 ## [1.1.0](https://github.com/oskratch/prestashop-module-privateshop/compare/v1.0.0...v1.1.0) (2025-10-07)
 
 
