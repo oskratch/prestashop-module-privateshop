@@ -1,60 +1,59 @@
-# Private Shop - Store Access Control
- 
+# Private Shop
+
 [![PrestaShop](https://img.shields.io/badge/PrestaShop-1.7.x%20%7C%201.8.x-blue)](https://www.prestashop.com/)
 [![PHP](https://img.shields.io/badge/PHP-7.2%2B-blue)](https://www.php.net/)
 [![License](https://img.shields.io/badge/License-GPL--2.0-green.svg)](LICENSE)
 
-## Description
-Transform your PrestaShop store into a private, invitation-only shop with complete access control. This module is perfect for B2B stores, exclusive retailers, or any business requiring customer pre-approval before allowing purchases.
+PrestaShop module that turns a store into a private shop: customers can only browse and buy once an administrator has approved their account. Useful for B2B, wholesale and members-only stores.
 
-## How It Works
+## How it works
 
-### Customer Registration Flow
-1. **Customer registers** through the standard registration form with additional DNI field
-2. **Account created but restricted** - customer cannot browse or purchase yet
-3. **Admin receives notification** email about the new registration
-4. **Admin reviews and approves** the customer in the backoffice
-5. **Customer receives approval email** and can now access the full store
+### Registration
 
-### Access Control
-- **Unapproved customers:** Redirected to login page with approval pending message
-- **Non-logged users:** Can only access login, registration, and password recovery pages
-- **Approved customers:** Full store access with optional shipping restrictions
+1. The customer registers with the standard form, which gets an extra DNI field.
+2. The account is created but restricted: the customer can't browse or buy yet.
+3. The administrator gets an email about the new registration.
+4. The administrator approves (or rejects) the customer in the back office.
+5. The customer gets an approval email and can use the store.
 
-### Admin Management
-Navigate to **Customers > Private Shop** in your backoffice to:
-- View all pending customer approvals
-- Approve or reject customer accounts
-- Manage individual shipping permissions (enable/disable home delivery per customer)
-- Configure notification emails and carrier restrictions
+### Access
 
-## Key Features
-- **Secure Registration:** Enhanced registration form with DNI validation and anti-spam protection
-- **Email Notifications:** Automated emails to admins and customers during the approval process
-- **Flexible Shipping Control:** Disable home delivery by default, enable per customer as needed
-- **Anti-Spam Protection:** Built-in honeypot system blocks automated bot registrations
-- **Seamless Integration:** Works with existing PrestaShop themes and doesn't affect approved customer experience
+- **Visitors who aren't logged in** only see the login, registration and password recovery pages.
+- **Customers pending approval** are sent to the login page with a message saying their account is under review.
+- **Approved customers** have full access, with optional shipping restrictions.
+
+### Back office
+
+Under **Customers** → **Private Shop** you can:
+
+- See customers waiting for approval
+- Approve or reject accounts
+- Enable or disable home delivery per customer
+- Set the notification emails and the carriers affected by shipping restrictions
+
+## Features
+
+- **Registration with DNI validation** and a honeypot field that blocks bot sign-ups.
+- **Emails** to the administrator and the customer at each step of the approval.
+- **Shipping control**: home delivery off by default, enabled per customer.
+- Works with existing themes; approved customers see the store as usual.
 
 ## Installation
-1. Download the latest release from GitHub
-2. In your PrestaShop admin, go to **Modules > Module Manager**
-3. Click **Upload a Module** and select the downloaded ZIP file
-4. Install and configure the module through the **Configure** button
+
+1. Download the latest release from GitHub.
+2. In the back office, go to **Modules** → **Module Manager** → **Upload a Module** and select the ZIP.
+3. Install it and open **Configure**.
 
 ## Configuration
-1. **Module Settings:** Configure admin notification emails and select carriers for shipping restrictions
-2. **Customer Management:** Use **Customers > Private Shop** to manage approvals and permissions
-3. **Email Templates:** Customize notification emails in **Design > Email Themes** if needed
 
-## Perfect For
-- **B2B Stores:** Require business verification before allowing access
-- **Exclusive Retailers:** Create VIP or member-only shopping experiences  
-- **Wholesale Businesses:** Control who can see products and pricing
-- **Regional Stores:** Restrict access based on location or delivery areas
+1. **Module settings**: notification emails and the carriers used for shipping restrictions.
+2. **Customers**: approvals and shipping permissions under **Customers** → **Private Shop**.
+3. **Email templates**: editable in **Design** → **Email Themes** if needed.
 
 ## Support
-For technical support or questions, contact `oskratch@gmail.com` or create an issue on the GitHub repository.
+
+Contact `oskratch@gmail.com` or open an issue on GitHub.
 
 ## License
-Licensed under GPL-2.0. See [LICENSE](LICENSE) file for details.
 
+GPL-2.0. See [LICENSE](LICENSE).
